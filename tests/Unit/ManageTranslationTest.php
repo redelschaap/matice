@@ -6,6 +6,7 @@ use Genl\Matice\Facades\Matice;
 use Genl\Matice\Tests\TestCase;
 use Illuminate\Support\Facades\Blade;
 use Genl\Matice\MaticeServiceProvider;
+use Illuminate\Support\Facades\Lang;
 
 class ManageTranslationTest extends TestCase
 {
@@ -35,10 +36,38 @@ class ManageTranslationTest extends TestCase
         $this->assertIsArray($translations);
 
         $this->assertArrayHasKey('en', $translations);
+        $this->assertCount(4, $translations['en']);
 
-        $this->assertCount(3, $translations['en']);
+        $this->assertStringContainsString("Hi! I'm a json translation text.", json_encode($translations['en']));
 
-        $this->assertStringContainsString("Hi! I'm a json translation text.", json_encode($translations));
+        $this->assertArrayHasKey('From default json file', $translations['en']);
+        $this->assertContains("Hi! I'm fom a default json translation file.", $translations['en']);
+    }
+
+    public function test_load_translations_from_additional_json_paths()
+    {
+        $supportsJsonPaths = method_exists(Lang::getLoader(), 'jsonPaths') || method_exists(Lang::getLoader(), 'getJsonPaths');
+
+        if (!$supportsJsonPaths) {
+            $this->markTestSkipped('The current Laravel version does not support loading translations from additional json paths.');
+        }
+
+        Lang::addJsonPath(__DIR__ . ('/../../tests/assets/additional_json_files'));
+
+        $translations = Matice::translations();
+
+        $this->assertIsArray($translations);
+
+        $this->assertArrayHasKey('en', $translations);
+        $this->assertCount(5, $translations['en']);
+
+        $this->assertStringContainsString("Hi! I'm a json translation text.", json_encode($translations['en']));
+
+        $this->assertArrayHasKey('From default json file', $translations['en']);
+        $this->assertContains("Hi! I'm fom a default json translation file.", $translations['en']);
+
+        $this->assertArrayHasKey('From additional json file', $translations['en']);
+        $this->assertContains("Hi! I'm fom an additional json translation file.", $translations['en']);
     }
 
     public function test_generate_translation_js()
