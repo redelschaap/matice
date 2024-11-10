@@ -72,7 +72,7 @@ class Helpers
         $ffs = scandir($localeFolder);
 
         foreach ($ffs as $ff) {
-            // We skip hidden folders or config files the directory.
+            // We skip hidden folders or config files in the directory.
             if (Str::startsWith($ff, '.')) {
                 continue;
             }
